@@ -120,6 +120,22 @@ var tasks = {
     return cleanCSS(masterTree);
   },
 
+  index: function (masterTree) {
+    // create tree for index
+    //var indexTree = pickFiles("./", {
+    //  srcDir: "./",
+    //  files: ["^index.html$"],
+    //  destDir: dirs.jsDist
+    //});
+    var indexTree = funnel(".", {
+      files: ["index.html"]
+    });
+    return mergeTrees(
+      [masterTree, indexTree],
+      { overwrite: true }
+    );
+  },
+
   img: function (masterTree) {
     // create tree for image files
     var imgTree = pickFiles(dirs.img, {
@@ -171,6 +187,7 @@ if (env === "development" || env === "production" ) {
   // add steps used in both development and production
   buildTree = _.compose(
     tasks.img,
+    tasks.index,
     tasks.css,
     tasks.webpack,
     buildTree
