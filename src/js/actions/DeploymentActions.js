@@ -4,18 +4,31 @@ var config = require("../config/config");
 var AppDispatcher = require("../AppDispatcher");
 var DeploymentEvents = require("../events/DeploymentEvents");
 
+var Oboe = function (req) {
+  var api = oboe(req)
+    .start(function (status) {
+      this.status = status;
+    });
+
+  api.success = function (callback) {
+    this.done(function (payload) {
+      if (this.status !== 200) {
+        return;
+      } else {
+        callback(payload);
+      }
+    });
+    return this;
+  };
+  return api;
+};
+
 var DeploymentActions = {
   requestDeployments: function () {
     this.request({
       url: config.apiURL + "v2/deployments"
     })
-    .start(function (status) {
-      this.status = status;
-    })
-    .done(function (deployments) {
-      if (this.status !== 200) {
-        return;
-      }
+    .success(function (deployments) {
       AppDispatcher.dispatch({
         actionType: DeploymentEvents.REQUEST,
         data: deployments
@@ -78,7 +91,7 @@ var DeploymentActions = {
       });
     });
   },
-  request: oboe
+  request: Oboe
 };
 
 module.exports = DeploymentActions;
