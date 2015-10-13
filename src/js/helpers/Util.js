@@ -84,6 +84,48 @@ var Util = {
     }
 
     return obj;
+  },
+  /* TODO remove after mesosphere/marathon#2404 */
+  appsToGroups: function (apps = []) {
+    var transformRecursive = function (tree, groupsPath, app) {
+      var groupId = groupsPath.splice(0, 1)[0];
+
+      if (groupId == null) {
+        if (tree.apps == null) {
+          tree.apps = [];
+        }
+        tree.apps.push(app);
+      } else {
+        if (tree.groups == null) {
+          tree.groups = [];
+        }
+        var currentGroup = tree.groups.find((group) => group.id === groupId);
+        if (currentGroup == null) {
+          currentGroup = {
+            id: groupId,
+            apps: [],
+            groups: []
+          };
+          tree.groups.push(currentGroup);
+        }
+
+        transformRecursive(currentGroup, groupsPath, app);
+      }
+    };
+
+    var tree = {
+      id: "/",
+      apps: [],
+      groups: []
+    };
+
+    apps.forEach((app) => {
+      var path = app.id;
+      var groupsPath = path.split("/").slice(1, -1); // ["path", "to"]
+      transformRecursive(tree, groupsPath, app);
+    });
+
+    return tree;
   }
 };
 

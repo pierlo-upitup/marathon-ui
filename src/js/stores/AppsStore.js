@@ -1,5 +1,6 @@
 var EventEmitter = require("events").EventEmitter;
 var lazy = require("lazy.js");
+var Util = require("../helpers/Util");
 
 var AppDispatcher = require("../AppDispatcher");
 var AppsEvents = require("../events/AppsEvents");
@@ -189,6 +190,8 @@ function applyAppDelayStatusOnAllApps(apps, queue) {
 var AppsStore = lazy(EventEmitter.prototype).extend({
   // Array of apps objects recieved from the "apps/"-endpoint
   apps: [],
+  // Nested array of groups as if it was recieved from the "groups/"-endpoint
+  groups: [],
   // Object of the current app recieved from the "apps/[appId]"-endpoint
   // This endpoint delievers more data, like the tasks on the app.
   currentApp: appScheme,
@@ -223,6 +226,7 @@ AppDispatcher.register(function (action) {
     case AppsEvents.REQUEST_APPS:
       AppsStore.apps = processApps(action.data.body.apps);
       applyAppDelayStatusOnAllApps(AppsStore.apps, QueueStore.queue);
+      AppsStore.groups = Util.appsToGroups(AppsStore.apps);
       AppsStore.emit(AppsEvents.CHANGE);
       break;
     case AppsEvents.REQUEST_APPS_ERROR:

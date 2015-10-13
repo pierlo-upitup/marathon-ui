@@ -51,6 +51,7 @@ var AppListComponent = React.createClass({
   getInitialState: function () {
     var fetchState = States.STATE_LOADING;
     var apps = AppsStore.apps;
+    var groups = AppsStore.groups;
 
     if (apps.length > 0) {
       fetchState = States.STATE_SUCCESS;
@@ -60,6 +61,7 @@ var AppListComponent = React.createClass({
       apps: apps,
       currentGroup: "/",
       fetchState: fetchState,
+      groups: groups,
       sortKey: "id",
       sortDescending: false
     };
@@ -80,7 +82,8 @@ var AppListComponent = React.createClass({
   onAppsChange: function () {
     this.setState({
       apps: AppsStore.apps,
-      fetchState: States.STATE_SUCCESS
+      fetchState: States.STATE_SUCCESS,
+      groups: AppsStore.groups
     });
   },
 

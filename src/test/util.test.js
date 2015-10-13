@@ -280,4 +280,60 @@ describe("Util", function () {
     });
 
   });
+
+  describe("appsToGroups", function () {
+
+    it("transforms a list of apps to a nested tree", function () {
+      var apps = [
+        {id: "/app-1"},
+        {id: "/group/A/app-2"},
+        {id: "/group/B/app-3"},
+        {id: "/group/A/app-4"}
+      ];
+
+      var tree = Util.appsToGroups(apps);
+// /group/A
+      expect(tree).to.deep.equal({
+        id: "/",
+        apps: [
+          {id: "/app-1"}
+        ],
+        groups: [
+          {
+            id: "group",
+            apps: [],
+            groups: [
+              {
+                id: "A",
+                apps: [
+                  {id: "/group/A/app-2"},
+                  {id: "/group/A/app-4"}
+                ],
+                groups: []
+              },
+              {
+                id: "B",
+                apps: [
+                  {id: "/group/B/app-3"}
+                ],
+                groups: []
+              }
+            ]
+          }
+        ]
+      });
+    });
+
+    it("handles an empty list gracefully", function () {
+      var apps = [];
+      var tree = Util.appsToGroups(apps);
+
+      expect(tree).to.deep.equal({
+        id: "/",
+        apps: [],
+        groups: []
+      });
+    });
+
+  });
 });
